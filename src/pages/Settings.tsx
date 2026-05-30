@@ -10,6 +10,7 @@ export default function Settings() {
   const [newPw, setNewPw] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetEmailLoading, setResetEmailLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -51,6 +52,31 @@ export default function Settings() {
       setError(err.message || 'Failed to change password.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function sendResetEmail() {
+    const email = user?.email || profile?.email || '';
+    if (!email) {
+      setError('No email address is saved for this account.');
+      return;
+    }
+
+    setResetEmailLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/change-password`,
+      });
+
+      if (resetError) throw resetError;
+      setSuccess(`Password reset link sent to ${email}.`);
+    } catch (err: any) {
+      setError(err.message || 'Could not send password reset link.');
+    } finally {
+      setResetEmailLoading(false);
     }
   }
 
@@ -140,6 +166,20 @@ export default function Settings() {
               </button>
             </div>
           </form>
+
+          <div className="mt-5 border-t border-gray-100 pt-4">
+            <p className="text-xs text-gray-400 mb-3">
+              Forgot your current password? Send a reset link to your login email.
+            </p>
+            <button
+              type="button"
+              onClick={sendResetEmail}
+              disabled={resetEmailLoading}
+              className="w-full border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              {resetEmailLoading ? 'Sending...' : 'Send Password Reset Link'}
+            </button>
+          </div>
         </div>
       </div>
     </Layout>

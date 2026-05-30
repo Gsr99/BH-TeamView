@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Layout from '../../components/layout/Layout';
@@ -22,6 +23,7 @@ function getErrorMessage(err: unknown) {
 
 export default function Managers() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   const [managers, setManagers] = useState<KnownUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -320,6 +322,9 @@ export default function Managers() {
       if (!res.ok) throw new Error(result.error || 'Failed to reset password.');
 
       setSuccess(`Password for "${resetTarget.full_name || resetTarget.email}" has been reset. Share the temporary password with them — they will be required to change it on next login.`);
+      if (resetTarget.id === user?.id) {
+        navigate('/change-password', { replace: true });
+      }
       setResetTarget(null);
       setTempPassword('');
     } catch (err: any) {
