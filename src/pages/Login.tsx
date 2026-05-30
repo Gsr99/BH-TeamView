@@ -42,7 +42,7 @@ export default function Login() {
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
         <div className="text-center mb-8">
           <img
-            src="/logo.svg"
+            src="/bombay-haus-logo.png"
             alt="Bombay Haus"
             className="w-20 h-20 rounded-full object-cover mx-auto mb-4"
           />

@@ -143,15 +143,22 @@ export default function ManagerDashboard() {
       <div className="space-y-6">
 
         {/* Welcome header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome, {profile?.full_name?.split(' ')[0] || 'Manager'} 👋
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {new Date().toLocaleDateString('de-DE', {
-              weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
-            })}
-          </p>
+        <div className="flex items-center gap-3">
+          <img
+            src="/bombay-haus-logo.png"
+            alt="Bombay Haus"
+            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome, {profile?.full_name?.split(' ')[0] || 'Manager'} 👋
+            </h1>
+            <p className="text-gray-500 text-sm mt-1">
+              {new Date().toLocaleDateString('de-DE', {
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+              })}
+            </p>
+          </div>
         </div>
 
         {/* Quick action buttons */}

@@ -161,11 +161,18 @@ export default function AdminDashboard() {
       )}
 
       {/* Page title */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Today: {new Date().toLocaleDateString('en-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="mb-6 flex items-center gap-3">
+        <img
+          src="/bombay-haus-logo.png"
+          alt="Bombay Haus"
+          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+        />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Today: {new Date().toLocaleDateString('en-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
       </div>
 
       {/* Stats cards */}

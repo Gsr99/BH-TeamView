@@ -25,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
             ☰
           </button>
           <img
-            src="/logo.svg"
+            src="/bombay-haus-logo.png"
             alt="Bombay Haus"
             className="w-8 h-8 rounded-full object-cover"
           />
