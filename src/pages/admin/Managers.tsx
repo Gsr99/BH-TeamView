@@ -334,6 +334,26 @@ export default function Managers() {
     }
   }
 
+  async function updateLoginEmail(targetUserId: string, email: string) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-email`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ user_id: targetUserId, email }),
+    });
+
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || 'Failed to update login email.');
+    return result.profile || null;
+  }
+
   async function saveProfileChanges(e: React.FormEvent) {
     e.preventDefault();
     if (!editingUser) return;
@@ -355,6 +375,13 @@ export default function Managers() {
     setSuccess('');
 
     try {
+      const existingEmail = editingUser.email?.trim().toLowerCase() || '';
+      let emailProfile: Partial<KnownUser> | null = null;
+
+      if (email && email !== existingEmail) {
+        emailProfile = await updateLoginEmail(editingUser.id, email);
+      }
+
       const profileData = {
         id: editingUser.id,
         full_name: fullName,
@@ -384,7 +411,7 @@ export default function Managers() {
 
         const result = await response.json().catch(() => ({}));
         if (!response.ok) saveError = new Error(result.error || 'Profile function failed.');
-        else savedProfile = result.profile || profileData;
+        else savedProfile = result.profile || emailProfile || profileData;
       }
 
       if (saveError) throw saveError;

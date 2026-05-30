@@ -6,6 +6,9 @@ import Layout from '../components/layout/Layout';
 export default function Settings() {
   const { user, profile } = useAuth();
 
+  const [emailCurrentPassword, setEmailCurrentPassword] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
   const [current, setCurrent] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -17,6 +20,13 @@ export default function Settings() {
   function reset() {
     setCurrent(''); setNewPw(''); setConfirm('');
     setError(''); setSuccess('');
+  }
+
+  function resetEmailForm() {
+    setEmailCurrentPassword('');
+    setNewEmail('');
+    setError('');
+    setSuccess('');
   }
 
   async function handleChangePassword(e: React.FormEvent) {
@@ -80,6 +90,52 @@ export default function Settings() {
     }
   }
 
+  async function handleChangeEmail(e: React.FormEvent) {
+    e.preventDefault();
+    const email = newEmail.trim().toLowerCase();
+    const currentEmail = user?.email || profile?.email || '';
+
+    setError('');
+    setSuccess('');
+
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (email === currentEmail.toLowerCase()) {
+      setError('New email must be different from your current email.');
+      return;
+    }
+    if (!emailCurrentPassword) {
+      setError('Please enter your current password to change email.');
+      return;
+    }
+
+    setEmailLoading(true);
+
+    try {
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: currentEmail,
+        password: emailCurrentPassword,
+      });
+      if (signInErr) throw new Error('Current password is incorrect.');
+
+      const { error: emailError } = await supabase.auth.updateUser(
+        { email },
+        { emailRedirectTo: `${window.location.origin}/settings` }
+      );
+      if (emailError) throw emailError;
+
+      await supabase.from('profiles').update({ email }).eq('id', user!.id);
+      setSuccess(`Email change requested for ${email}. If confirmation is enabled, check that inbox to confirm the change.`);
+      resetEmailForm();
+    } catch (err: any) {
+      setError(err.message || 'Could not change email.');
+    } finally {
+      setEmailLoading(false);
+    }
+  }
+
   return (
     <Layout>
       <div className="max-w-lg mx-auto space-y-6">
@@ -87,6 +143,13 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
           <p className="text-gray-500 text-sm mt-1">Manage your account settings</p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm">{success}</div>
+        )}
 
         {/* Account info */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -106,17 +169,55 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Change Email */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="text-sm font-semibold text-gray-900 mb-1">Change Email</h2>
+          <p className="text-xs text-gray-400 mb-4">Change the email address used to sign in.</p>
+
+          <form onSubmit={handleChangeEmail} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">New Email</label>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={e => { setNewEmail(e.target.value); setError(''); }}
+                placeholder={user?.email || profile?.email || 'new@email.com'}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+              <input
+                type="password"
+                value={emailCurrentPassword}
+                onChange={e => { setEmailCurrentPassword(e.target.value); setError(''); }}
+                placeholder="Confirm with current password"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={resetEmailForm}
+                className="flex-1 border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                type="submit"
+                disabled={emailLoading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-colors"
+              >
+                {emailLoading ? 'Saving...' : 'Change Email'}
+              </button>
+            </div>
+          </form>
+        </div>
+
         {/* Change Password */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-sm font-semibold text-gray-900 mb-1">Change Password</h2>
           <p className="text-xs text-gray-400 mb-4">Enter your current password to set a new one.</p>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4">{error}</div>
-          )}
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm mb-4">{success}</div>
-          )}
 
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
