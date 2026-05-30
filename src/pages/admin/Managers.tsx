@@ -190,6 +190,7 @@ export default function Managers() {
           email: payload.email,
           role: 'manager',
           is_active: true,
+          must_change_password: true,
           updated_at: new Date().toISOString(),
         })
         .eq('id', authData.user.id);
@@ -294,6 +295,24 @@ export default function Managers() {
 
       setSuccess(`Manager ${newStatus ? 'activated' : 'deactivated'} successfully.`);
     fetchManagers();
+  }
+
+  async function forcePasswordReset(manager: KnownUser) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ must_change_password: true })
+      .eq('id', manager.id);
+
+    if (error) { setError('Failed to force password reset.'); return; }
+
+    await supabase.from('audit_logs').insert({
+      action: 'FORCE_PASSWORD_RESET',
+      table_name: 'profiles',
+      performed_by: user?.id,
+      details: `Admin forced password reset for ${manager.full_name || manager.email}`,
+    });
+
+    setSuccess(`Password reset forced for ${manager.full_name || manager.email}. They will be prompted to change it on next login.`);
   }
 
   async function saveProfileChanges(e: React.FormEvent) {
@@ -598,14 +617,23 @@ export default function Managers() {
                     </div>
                   </div>
 
-                  {/* Toggle active */}
+                  {/* Actions */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => openEditProfile(manager)}
                       className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                     >
-                      Edit Profile
+                      Edit
                     </button>
+                    {!manager.inferred && manager.role !== 'admin' && (
+                      <button
+                        onClick={() => forcePasswordReset(manager)}
+                        title="Force this manager to change password on next login"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                      >
+                        🔑 Reset PW
+                      </button>
+                    )}
                     <button
                       onClick={() => toggleActive(manager)}
                       disabled={manager.inferred}

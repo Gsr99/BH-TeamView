@@ -107,6 +107,7 @@ Deno.serve(async (req) => {
     email,
     role: 'manager',
     is_active: true,
+    must_change_password: true,
     updated_at: new Date().toISOString(),
   };
 
