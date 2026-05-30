@@ -77,6 +77,12 @@ const NAV_ITEMS: NavItem[] = [
     dividerBefore: true,
   },
   {
+    path: '/settings',
+    label: 'Settings',
+    icon: '⚙️',
+    dividerBefore: true,
+  },
+  {
     path: '/managers',
     label: 'Manage Users',
     icon: '👥',

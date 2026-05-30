@@ -31,6 +31,9 @@ export default function Managers() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingUser, setEditingUser] = useState<KnownUser | null>(null);
+  const [resetTarget, setResetTarget] = useState<KnownUser | null>(null);
+  const [tempPassword, setTempPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const [form, setForm] = useState({
     full_name: '',
@@ -297,22 +300,33 @@ export default function Managers() {
     fetchManagers();
   }
 
-  async function forcePasswordReset(manager: KnownUser) {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ must_change_password: true })
-      .eq('id', manager.id);
+  async function resetPassword() {
+    if (!resetTarget || !tempPassword) return;
+    if (tempPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
 
-    if (error) { setError('Failed to force password reset.'); return; }
+    setResetting(true);
+    setError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-    await supabase.from('audit_logs').insert({
-      action: 'FORCE_PASSWORD_RESET',
-      table_name: 'profiles',
-      performed_by: user?.id,
-      details: `Admin forced password reset for ${manager.full_name || manager.email}`,
-    });
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-user-password`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ user_id: resetTarget.id, new_password: tempPassword }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(result.error || 'Failed to reset password.');
 
-    setSuccess(`Password reset forced for ${manager.full_name || manager.email}. They will be prompted to change it on next login.`);
+      setSuccess(`Password for "${resetTarget.full_name || resetTarget.email}" has been reset. Share the temporary password with them — they will be required to change it on next login.`);
+      setResetTarget(null);
+      setTempPassword('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset password.');
+    } finally {
+      setResetting(false);
+    }
   }
 
   async function saveProfileChanges(e: React.FormEvent) {
@@ -625,10 +639,10 @@ export default function Managers() {
                     >
                       Edit
                     </button>
-                    {!manager.inferred && manager.role !== 'admin' && (
+                    {!manager.inferred && (
                       <button
-                        onClick={() => forcePasswordReset(manager)}
-                        title="Force this manager to change password on next login"
+                        onClick={() => { setResetTarget(manager); setTempPassword(''); setError(''); }}
+                        title="Set a temporary password for this user"
                         className="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                       >
                         🔑 Reset PW
@@ -655,6 +669,65 @@ export default function Managers() {
             </div>
           )}
         </div>
+
+        {/* Reset Password Modal */}
+        {resetTarget && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 w-full max-w-sm space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Reset Password</h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  Setting a temporary password for <strong>{resetTarget.full_name || resetTarget.email}</strong>.
+                  They will be required to change it on next login.
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 text-sm">{error}</div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tempPassword}
+                    onChange={e => { setTempPassword(e.target.value); setError(''); }}
+                    placeholder="Min 8 characters"
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setTempPassword(Math.random().toString(36).slice(-10) + 'A1!')}
+                    className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 font-medium transition-colors"
+                  >
+                    Generate
+                  </button>
+                </div>
+                <p className="text-xs text-amber-600 mt-1">⚠️ Copy this password and share it securely with the user.</p>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setResetTarget(null); setTempPassword(''); setError(''); }}
+                  disabled={resetting}
+                  className="flex-1 border border-gray-300 text-gray-700 rounded-lg py-2.5 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={resetPassword}
+                  disabled={resetting || !tempPassword}
+                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-colors"
+                >
+                  {resetting ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {editingUser && (
           <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">

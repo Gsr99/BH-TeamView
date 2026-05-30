@@ -5,6 +5,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 // Pages
 import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
+import Settings from './pages/Settings';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import CashBalance from './pages/manager/CashBalance';
@@ -41,6 +42,11 @@ export default function App() {
           {/* Public */}
           <Route path="/login" element={<Login />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
 
           {/* Root → role-based redirect */}
           <Route path="/" element={<RootRedirect />} />
