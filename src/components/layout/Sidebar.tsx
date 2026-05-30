@@ -77,12 +77,6 @@ const NAV_ITEMS: NavItem[] = [
     dividerBefore: true,
   },
   {
-    path: '/settings',
-    label: 'Settings',
-    icon: '⚙️',
-    dividerBefore: true,
-  },
-  {
     path: '/managers',
     label: 'Manage Users',
     icon: '👥',
@@ -208,7 +202,21 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* Sign out */}
-        <div className="px-3 py-3 border-t border-gray-700">
+        <div className="px-3 py-3 border-t border-gray-700 space-y-1">
+          <NavLink
+            to="/settings"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+              ${isActive
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <span className="text-base w-5 text-center flex-shrink-0">⚙️</span>
+            <span>Settings</span>
+          </NavLink>
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-red-600 hover:text-white transition-colors"
