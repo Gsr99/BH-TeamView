@@ -41,9 +41,11 @@ export default function Login() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-            WM
-          </div>
+          <img
+            src="/logo.svg"
+            alt="Bombay Haus"
+            className="w-20 h-20 rounded-full object-cover mx-auto mb-4"
+          />
           <h1 className="text-2xl font-bold text-gray-800">Website Manager</h1>
           <p className="text-gray-500 text-sm mt-1">Restaurant Cash Flow Management</p>
         </div>

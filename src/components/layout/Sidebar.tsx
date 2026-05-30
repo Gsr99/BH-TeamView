@@ -132,12 +132,19 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         `}
       >
         {/* App name */}
-        <div className="px-5 py-4 border-b border-gray-700 flex items-center justify-between">
-          <div>
+        <div className="px-4 py-4 border-b border-gray-700 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <img
+              src="/logo.svg"
+              alt="Bombay Haus"
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            />
+            <div className="min-w-0">
             <h1 className="text-base font-bold text-white leading-tight">
               Website Manager
             </h1>
             <p className="text-xs text-gray-400 mt-0.5">Cash Flow Tracker</p>
+            </div>
           </div>
           {/* Close button — mobile only */}
           <button

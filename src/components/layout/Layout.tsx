@@ -24,6 +24,11 @@ export default function Layout({ children }: LayoutProps) {
           >
             ☰
           </button>
+          <img
+            src="/logo.svg"
+            alt="Bombay Haus"
+            className="w-8 h-8 rounded-full object-cover"
+          />
           <span className="text-sm font-semibold text-gray-800">Website Manager</span>
         </header>
 
