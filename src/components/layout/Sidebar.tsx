@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import UserAvatar from '../common/UserAvatar';
 
 interface NavItem {
   path: string;
@@ -158,10 +159,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         {/* User info */}
         <div className="px-4 py-3 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold flex-shrink-0 uppercase">
-              {profile?.full_name?.charAt(0) || '?'}
-            </div>
+            <UserAvatar name={profile?.full_name} role={profile?.role} size="sm" inactive={profile?.is_active === false} />
             <div className="overflow-hidden">
               <p className="text-sm font-medium text-white truncate leading-tight">
                 {profile?.full_name || 'User'}

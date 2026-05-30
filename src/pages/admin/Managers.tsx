@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Layout from '../../components/layout/Layout';
+import UserAvatar from '../../components/common/UserAvatar';
 import { fetchKnownUsers } from '../../lib/users';
 import type { KnownUser } from '../../lib/users';
 
@@ -612,17 +613,12 @@ export default function Managers() {
                   className="px-4 py-4 flex items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <div className={`
-                      w-10 h-10 rounded-full flex items-center justify-center
-                      text-sm font-bold uppercase flex-shrink-0
-                      ${manager.is_active !== false
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-500'
-                      }
-                    `}>
-                      {manager.full_name?.charAt(0) || '?'}
-                    </div>
+                    <UserAvatar
+                      name={manager.full_name || manager.email}
+                      role={manager.role}
+                      size="md"
+                      inactive={manager.is_active === false}
+                    />
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-gray-900">

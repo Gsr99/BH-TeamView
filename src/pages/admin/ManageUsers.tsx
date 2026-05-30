@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Layout from '../../components/layout/Layout';
+import UserAvatar from '../../components/common/UserAvatar';
 
 interface UserProfile {
   id: string;
@@ -164,9 +165,7 @@ export default function ManageUsers() {
               {users.map(u => (
                 <div key={u.id} className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                      {u.full_name?.charAt(0)?.toUpperCase() || '?'}
-                    </div>
+                    <UserAvatar name={u.full_name || u.email} role={u.role} size="sm" inactive={u.is_active === false} />
                     <div>
                       <p className="font-medium text-gray-800 text-sm">{u.full_name || '—'}</p>
                       <p className="text-xs text-gray-400">{u.email}</p>

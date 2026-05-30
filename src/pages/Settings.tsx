@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Layout from '../components/layout/Layout';
+import UserAvatar from '../components/common/UserAvatar';
 
 export default function Settings() {
   const { user, profile } = useAuth();
@@ -155,9 +156,7 @@ export default function Settings() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">Account</h2>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold uppercase">
-              {profile?.full_name?.charAt(0) || '?'}
-            </div>
+            <UserAvatar name={profile?.full_name} role={profile?.role} size="lg" inactive={profile?.is_active === false} />
             <div>
               <p className="text-sm font-medium text-gray-900">{profile?.full_name || 'User'}</p>
               <p className="text-xs text-gray-400">{user?.email}</p>
